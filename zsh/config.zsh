@@ -40,6 +40,8 @@ setopt complete_aliases
 
 zle -N newtab
 
+#since EDITOR=mvim zsh starts in vim mode. Setting it to emacs mode here.
+bindkey -e
 bindkey '^[^[[D' backward-word
 bindkey '^[^[[C' forward-word
 bindkey '^[[5D' beginning-of-line
