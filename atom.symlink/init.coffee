@@ -1,1 +1,6 @@
-# Add any auto-loaded Atom code on init here.
+# path = require 'path'
+
+# atom.workspaceView.eachEditorView (editorView) ->
+#   editor = editorView.getEditor()
+#   if path.extname(editor.getPath()) is '.md'
+#     editor.setSoftWrap(true)

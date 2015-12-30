@@ -3,8 +3,9 @@
     showIndentGuide: true
     fontFamily: "Menlo"
     invisibles: {}
-    fontSize: 15
-    softWrapAtPreferredLineLength: true
+    fontSize: 11
+    showInvisibles: true
+    confirmCheckoutHeadRevision: false
   core:
     ignoredNames: [
       ".bundle"
@@ -14,17 +15,19 @@
       "tmp"
       "vendor"
     ]
-    themes: [
-      "unity-ui"
-      "glacier-syntax"
-    ]
     hideGitIgnoredFiles: true
     disabledPackages: [
       "background-tips"
       "exception-reporting"
       "metrics"
+      "racer"
+      "linter-jscs"
     ]
-    followSymlinks: false
+    themes: [
+      "atom-dark-ui"
+      "solarized-dark-syntax"
+    ]
+    excludeVcsIgnoredPaths: false
   "spell-check":
     grammars: [
       "text.plain"
@@ -35,5 +38,22 @@
     showOnStartup: false
   "release-notes":
     viewedVersion: "0.89.0"
-  "go-plus":
-    goPath: "/Users/holman/Code/go"
+  "vim-mode": {}
+  "tree-view": {}
+  "bracket-matcher":
+    autocompleteBrackets: false
+    autocompleteSmartQuotes: false
+  "keybinding-cheatsheet": {}
+  linter: {}
+  "linter-jshint":
+    esnext: true
+  racer: {}
+  "git-blame": {}
+".c.source":
+  editor:
+    tabLength: 4
+    softTabs: false
+".js.source":
+  editor:
+    tabLength: 4
+    softTabs: true
