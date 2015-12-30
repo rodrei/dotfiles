@@ -1,2 +1,2 @@
 alias reload!='. ~/.zshrc'
-alias rd='rake device'
+alias be='bundle exec'
