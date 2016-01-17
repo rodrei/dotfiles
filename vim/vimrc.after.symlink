@@ -16,4 +16,4 @@ set t_Co=16 "Necessary for solarized to look good on iTerm
 " Set special options for Javascript files
 au Filetype javascript setlocal tabstop=4 shiftwidth=4
 
-
+"let g:syntastic_javascript_checkers = ['jscs']
