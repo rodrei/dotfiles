@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+# Tried to make one variable $paths that holds a list of paths,
+# and then add the gem paths only if Gemfile is available.
+# But couldn't make this work
+# paths=*
+# paths="$paths $(bundle list --paths)"
+#
+
+
+# Exit if a command fails
+set -e
+
+if [[ -a Gemfile ]]; then
+  gem_paths=$(bundle list --paths)
+fi
+
+ctags -R --exclude=.git --exclude=log * $(echo $gem_paths) #How do I expand $gem_paths without including ""
+
