@@ -7,10 +7,13 @@ set background=dark
 set cursorline
 " If a file is changed outside of vim, automatically reload it without asking
 set autoread
+
+" Set theme
 let g:solarized_termtrans = 1
 color solarized
 set t_Co=16 "Necessary for solarized to look good on iTerm
 
+" Set special options for Javascript files
 au Filetype javascript setlocal tabstop=4 shiftwidth=4
 
 
