@@ -17,3 +17,10 @@ set t_Co=16 "Necessary for solarized to look good on iTerm
 au Filetype javascript setlocal tabstop=4 shiftwidth=4
 
 "let g:syntastic_javascript_checkers = ['jscs']
+
+
+" Press space bar to clear search results
+:nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
+
+" Avoid vim to freeze when saving go files
+let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
