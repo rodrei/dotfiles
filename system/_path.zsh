@@ -8,3 +8,6 @@ export PATH="$HOME/.rvm/bin:$PATH" # Add RVM to PATH for scripting
 
 #Mozart
 export PATH="/Applications/Mozart.app/Contents/Resources/bin:$PATH"
+
+#GO
+export PATH="$GOPATH/bin:$PATH"
