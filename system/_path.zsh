@@ -8,3 +8,6 @@ export PATH="/Applications/Mozart.app/Contents/Resources/bin:$PATH"
 
 #GO
 export PATH="$GOPATH/bin:$PATH"
+
+#rbenv
+export PATH="$HOME/.rbenv/shims:/bin:$PATH"
