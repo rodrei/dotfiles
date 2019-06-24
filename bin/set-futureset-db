@@ -1,4 +1,0 @@
-#!/bin/zsh
-#
-cp ~/.dotfiles/bin/database.yml config
-
