@@ -49,6 +49,10 @@ Plugin 'dense-analysis/ale'
 Plugin 'majutsushi/tagbar'
 
 
+" Use vim-jsx-pretty directly for jsx instead of polyglot
+" let g:polyglot_disabled = ['jsx']
+" let g:vim_jsx_pretty_disable_js = 1
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
