@@ -1,4 +1,4 @@
-export EDITOR='code'
+export EDITOR='nvim'
 export ATOM_DEV_RESOURCE_PATH='~/code/atom'
 
 # aws-cli
