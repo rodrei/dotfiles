@@ -30,9 +30,9 @@ Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
 Plugin 'git@github.com:ctrlpvim/ctrlp.vim.git'
 Plugin 'git@github.com:preservim/nerdtree.git'
 Plugin 'git@github.com:mileszs/ack.vim.git'
-Plugin 'micha/vim-colors-solarized'
 Plugin 'git@github.com:bronson/vim-trailing-whitespace.git'
 Plugin 'git@github.com:airblade/vim-gitgutter.git'
+Plugin 'git@github.com:github/copilot.vim.git'
 Plugin 'slim-template/vim-slim'
 Plugin 'gorodinskiy/vim-coloresque'
 Plugin 'preservim/nerdcommenter'
@@ -47,6 +47,10 @@ Plugin 'elzr/vim-json'
 Plugin 'mattn/emmet-vim'
 Plugin 'dense-analysis/ale'
 Plugin 'majutsushi/tagbar'
+
+" Color schemes
+Plugin 'micha/vim-colors-solarized'
+Plugin 'morhetz/gruvbox'
 
 
 " Use vim-jsx-pretty directly for jsx instead of polyglot
