@@ -10,6 +10,9 @@ IRB.conf[:PROMPT_MODE] = :SIMPLE
 
 IRB.conf[:AUTO_INDENT] = true
 
+IRB.conf[:USE_COLORIZE] = false
+IRB.conf[:USE_AUTOCOMPLETE] = false
+
 class Object
   # list methods which aren't in superclass
   def local_methods(obj = self)
