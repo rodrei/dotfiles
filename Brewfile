@@ -2,6 +2,7 @@ cask_args appdir: '/Applications'
 
 tap 'homebrew/cask'
 tap 'homebrew/bundle'
+tap 'microsoft/git'
 
 brew 'ack'
 brew 'coreutils'
@@ -15,6 +16,7 @@ brew 'unrar'
 brew 'wget'
 brew 'gnu-sed'
 brew 'diff-so-fancy'
+brew 'git-credential-manager-core'
 
 cask 'google-chrome'
 cask 'seashore'
