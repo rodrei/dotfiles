@@ -1,6 +1,6 @@
 cask_args appdir: '/Applications'
 
-tap 'caskroom/cask'
+tap 'homebrew/cask'
 tap 'homebrew/bundle'
 
 brew 'ack'
@@ -14,6 +14,7 @@ brew 'spark'
 brew 'unrar'
 brew 'wget'
 brew 'gnu-sed'
+brew 'diff-so-fancy'
 
 cask 'google-chrome'
 cask 'seashore'
