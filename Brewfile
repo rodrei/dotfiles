@@ -18,6 +18,7 @@ brew 'diff-so-fancy'
 brew 'git-credential-manager-core'
 brew 'rbenv'
 brew 'ruby-build'
+brew 'gh'
 
 cask 'slack'
 cask 'vlc'
