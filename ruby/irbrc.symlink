@@ -1,17 +1,12 @@
 #!/usr/bin/ruby
 require 'irb/completion'
-require 'irb/ext/save-history'
 require 'rubygems'
 
-IRB.conf[:SAVE_HISTORY] = 1000
 IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
 
 IRB.conf[:PROMPT_MODE] = :SIMPLE
 
 IRB.conf[:AUTO_INDENT] = true
-
-IRB.conf[:USE_COLORIZE] = false
-IRB.conf[:USE_AUTOCOMPLETE] = false
 
 class Object
   # list methods which aren't in superclass
@@ -43,7 +38,7 @@ def cop
 end
 
 def me
-  User.find_by_login(ENV['USER'].strip)
+  User.find_by_email(`git config --get user.email`.chomp)
 end
 
 def r
