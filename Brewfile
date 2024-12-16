@@ -1,6 +1,5 @@
 cask_args appdir: '/Applications'
 
-tap 'homebrew/cask'
 tap 'homebrew/bundle'
 tap 'microsoft/git'
 
@@ -15,10 +14,10 @@ brew 'spark'
 brew 'wget'
 brew 'gnu-sed'
 brew 'diff-so-fancy'
-brew 'git-credential-manager-core'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'gh'
+brew 'nvim'
+brew 'fzf'
 
 cask 'slack'
-cask 'vlc'
