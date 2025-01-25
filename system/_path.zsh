@@ -11,3 +11,7 @@ export PATH="$GOPATH/bin:$PATH"
 
 #rbenv
 export PATH="$HOME/.rbenv/shims:/bin:$PATH"
+
+#User custom binaries
+export PATH="$HOME/.local/bin:$PATH"
+
