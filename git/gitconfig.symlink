@@ -28,7 +28,7 @@
         ui = true
 [core]
         excludesfile = ~/.gitignore
-        editor = vim
+        editor = nvim
         pager = diff-so-fancy | less --tabs=1,5 -R
 [apply]
         whitespace = nowarn
