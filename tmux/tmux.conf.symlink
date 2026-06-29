@@ -1,0 +1,113 @@
+##### General behavior #####
+
+set -g @plugin 'tmux-plugins/tmux-sensible' # List of plugins
+set -g @plugin 'catppuccin/tmux#v2.3.0' # See https://github.com/catppuccin/tmux/tags for additional tags
+
+# Change prefix from Ctrl-b to Ctrl-a
+
+# unbind C-b
+# set-option -g prefix C-a
+# bind-key C-a send-prefix
+
+# Start window and pane numbering at 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumber windows after one is closed
+set -g renumber-windows on
+
+# Faster escape timing; helps with Vim/Neovim
+set -sg escape-time 10
+
+# Increase scrollback
+set -g history-limit 50000
+
+# Allow mouse scrolling, pane selection, resizing
+set -g mouse on
+
+# Use 256 colors / true color support
+set -g default-terminal "tmux-256color"
+set-option -ga terminal-overrides ",xterm-256color:Tc"
+
+
+##### Splits #####
+
+# More intuitive split bindings
+unbind %
+unbind '"'
+
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# New windows open in current directory
+bind c new-window -c "#{pane_current_path}"
+
+
+##### Pane navigation #####
+
+# Vim-style pane movement
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Resize panes with prefix + H/J/K/L
+bind H resize-pane -L 5
+bind J resize-pane -D 5
+bind K resize-pane -U 5
+bind L resize-pane -R 5
+
+
+##### Reload config #####
+
+bind r source-file ~/.tmux.conf \; display-message "Tmux config reloaded"
+
+
+##### Copy mode #####
+
+# Use vi keys in copy mode
+setw -g mode-keys vi
+
+# Enter copy mode with prefix + [
+bind [ copy-mode
+
+# In copy mode:
+# v starts selection, y copies selection
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+##### Status Bar #####
+
+# Let tmux automatically rename windows based on the running command
+set -g automatic-rename on
+
+# But avoid aggressive terminal escape-sequence renaming
+set -g allow-rename off
+
+# Show index + current automatic/manual window name
+set -g @catppuccin_window_current_text " #{window_name}"
+set -g @catppuccin_window_text " #{window_name}"
+
+
+##### Pane UI ######
+
+##### Pane UI: only show pane title when window has multiple panes #####
+
+# Default: no top pane title/border label
+set -g pane-border-status off
+
+# Border colors
+set -g pane-border-style "fg=colour238"
+set -g pane-active-border-style "fg=colour177,bold"
+
+# What to show when pane-border-status is enabled
+set -g pane-border-format "#{?pane_active,#[bold]● ,  }#P: #{pane_current_command}"
+
+# Enable pane title only when the current window has more than one pane
+set-hook -g after-split-window 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+set-hook -g pane-exited 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+set-hook -g window-layout-changed 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+set-hook -g client-session-changed 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+set-hook -g window-focus-in 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+
+run 'tpack init'

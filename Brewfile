@@ -19,5 +19,7 @@ brew 'ruby-build'
 brew 'gh'
 brew 'nvim'
 brew 'fzf'
+brew 'tmux'
+brew 'tpack'
 
 cask 'slack'

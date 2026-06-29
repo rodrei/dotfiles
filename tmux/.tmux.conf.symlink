@@ -1,0 +1,90 @@
+##### General behavior #####
+
+# List of plugins
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'catppuccin/tmux#v2.3.0' # See https://github.com/catppuccin/tmux/tags for additional tags
+
+# Start window and pane numbering at 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumber windows after one is closed
+set -g renumber-windows on
+
+# Faster escape timing; helps with Vim/Neovim
+set -sg escape-time 10
+
+# Increase scrollback
+set -g history-limit 50000
+
+# Allow mouse scrolling, pane selection, resizing
+set -g mouse on
+
+# Use 256 colors / true color support
+set -g default-terminal "tmux-256color"
+set-option -ga terminal-overrides ",xterm-256color:Tc"
+
+
+##### Splits #####
+
+# More intuitive split bindings
+unbind %
+unbind '"'
+
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# New windows open in current directory
+bind c new-window -c "#{pane_current_path}"
+
+
+##### Pane navigation #####
+
+# Vim-style pane movement
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Resize panes with prefix + H/J/K/L
+bind H resize-pane -L 5
+bind J resize-pane -D 5
+bind K resize-pane -U 5
+bind L resize-pane -R 5
+
+
+##### Reload config #####
+
+bind r source-file ~/.tmux.conf \; display-message "Tmux config reloaded"
+
+
+##### Status bar #####
+
+set -g status on
+set -g status-position bottom
+set -g status-interval 5
+
+set -g status-left-length 40
+set -g status-left "#[bold] #S "
+
+set -g status-right "%Y-%m-%d %H:%M "
+
+setw -g window-status-current-format " #[bold]#I:#W "
+setw -g window-status-format " #I:#W "
+
+
+##### Copy mode #####
+
+# Use vi keys in copy mode
+setw -g mode-keys vi
+
+# Enter copy mode with prefix + [
+bind [ copy-mode
+
+# In copy mode:
+# v starts selection, y copies selection
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+# Initialize tpack (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'
