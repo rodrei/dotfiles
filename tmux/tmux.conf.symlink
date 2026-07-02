@@ -108,6 +108,10 @@ set-hook -g after-split-window 'if -F "#{>:#{window_panes},1}" "set -w pane-bord
 set-hook -g pane-exited 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
 set-hook -g window-layout-changed 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
 set-hook -g client-session-changed 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
-set-hook -g window-focus-in 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+# set-hook -g window-focus-in 'if -F "#{>:#{window_panes},1}" "set -w pane-border-status top" "set -w pane-border-status off"'
+
+set -g allow-passthrough on
+set -s extended-keys on
+set -as terminal-features 'xterm*:extkeys'
 
 run 'tpack init'
