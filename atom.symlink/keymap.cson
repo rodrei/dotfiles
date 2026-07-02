@@ -1,3 +1,0 @@
-'.editor':
-  'ctrl-s': 'tree-view:toggle-focus'
-  '\\ n': 'tree-view:toggle'
