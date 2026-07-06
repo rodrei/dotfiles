@@ -237,6 +237,21 @@ return {
 				-- ts_ls = {},
 				--
 
+				ruby_lsp = {
+					-- Launch through the rbenv shim (not Mason's install, whose
+					-- binstub is pinned to one Ruby) so ruby-lsp runs under each
+					-- project's Ruby version. cwd must be the project root for the
+					-- shim to pick up its .ruby-version. New rbenv rubies need a
+					-- one-time `gem install ruby-lsp`.
+					cmd = function(dispatchers, config)
+						return vim.lsp.rpc.start(
+							{ vim.fs.normalize("~/.rbenv/shims/ruby-lsp") },
+							dispatchers,
+							config and config.root_dir and { cwd = config.cmd_cwd or config.root_dir }
+						)
+					end,
+				},
+
 				lua_ls = {
 					-- cmd = { ... },
 					-- filetypes = { ... },
@@ -272,16 +287,21 @@ return {
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
+			-- Broadcast the extra cmp capabilities to every server, then apply the
+			-- per-server overrides from the `servers` table above.
+			vim.lsp.config("*", { capabilities = capabilities })
+			for server_name, config in pairs(servers) do
+				vim.lsp.config(server_name, config)
+			end
+
 			require("mason-lspconfig").setup({
-				handlers = {
-					function(server_name)
-						local server = servers[server_name] or {}
-						-- This handles overriding only values explicitly passed
-						-- by the server configuration above. Useful when disabling
-						-- certain features of an LSP (for example, turning off formatting for ts_ls)
-						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-						require("lspconfig")[server_name].setup(server)
-					end,
+				-- mason-lspconfig v2 auto-enables every Mason-installed server.
+				-- The standalone rubocop server is excluded because it lints with
+				-- default rules in every Ruby project; rubocop diagnostics instead
+				-- come from ruby-lsp, which only runs rubocop when the project's
+				-- bundle includes it.
+				automatic_enable = {
+					exclude = { "rubocop" },
 				},
 			})
 		end,
