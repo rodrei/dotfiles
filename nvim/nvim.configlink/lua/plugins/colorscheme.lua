@@ -11,6 +11,28 @@ return { -- You can easily change to a different colorscheme.
 			styles = {
 				comments = { italic = false }, -- Disable italics in comments
 			},
+			on_highlights = function(hl, c)
+				-- Mute markdown highlighting: the groups are scoped to
+				-- .markdown/.markdown_inline so other filetypes (help, vimdoc, ...)
+				-- keep the theme's full @markup styling.
+				hl["@markup.heading.markdown"] = { bold = true }
+				for i = 1, 6 do
+					hl["@markup.heading." .. i .. ".markdown"] = { bold = true }
+				end
+				hl["@markup.strong.markdown_inline"] = { bold = true }
+				hl["@markup.italic.markdown_inline"] = { italic = true }
+				hl["@markup.raw.markdown_inline"] = { fg = c.teal } -- inline `code`: colored text, no background
+				for _, group in ipairs({
+					"@markup.link.markdown_inline",
+					"@markup.link.label.markdown_inline",
+					"@markup.link.url.markdown_inline",
+					"@markup.list.markdown",
+					"@markup.quote.markdown",
+					"@punctuation.special.markdown", -- #, >, list markers
+				}) do
+					hl[group] = {}
+				end
+			end,
 		})
 
 		-- Load the colorscheme here.
