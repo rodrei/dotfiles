@@ -1,0 +1,11 @@
+# Lazygit config. Symlinked to ~/.config/lazygit by script/bootstrap.
+# Reference: https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+gui:
+  # Lines scrolled per <C-d>/<C-u> in the main (diff) panel
+  scrollHeight: 15
+git:
+  diffRenderers:
+    - colorArg: always
+      # delta adds syntax highlighting to diffs. --paging=never keeps it from
+      # spawning `less` inside lazygit.
+      command: delta --dark --paging=never --line-numbers
