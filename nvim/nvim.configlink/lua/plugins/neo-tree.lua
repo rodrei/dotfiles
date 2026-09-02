@@ -11,15 +11,6 @@ return {
 	},
 	cmd = "Neotree",
 	keys = {
-		{ "<leader>e", ":Neotree reveal<CR>", desc = "NeoTree reveal", silent = true },
-	},
-	opts = {
-		filesystem = {
-			window = {
-				mappings = {
-					["<leader>e"] = "close_window",
-				},
-			},
-		},
+		{ "<leader>e", ":Neotree toggle reveal<CR>", desc = "NeoTree toggle", silent = true },
 	},
 }
