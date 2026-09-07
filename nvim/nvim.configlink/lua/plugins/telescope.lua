@@ -56,7 +56,23 @@ return { -- Fuzzy Finder (files, lsp, etc)
 			--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
 			--   },
 			-- },
-			-- pickers = {}
+			pickers = {
+				find_files = {
+					path_display = { "filename_first" },
+					layout_strategy = "vertical",
+					layout_config = { preview_cutoff = 1, preview_height = 0.4 },
+				},
+				live_grep = {
+					path_display = { "filename_first" },
+					layout_strategy = "vertical",
+					layout_config = { preview_cutoff = 1, preview_height = 0.4 },
+				},
+				lsp_references = {
+					path_display = { "filename_first" },
+					layout_strategy = "vertical",
+					layout_config = { preview_cutoff = 1, preview_height = 0.4 },
+				},
+			},
 			extensions = {
 				["ui-select"] = {
 					require("telescope.themes").get_dropdown(),

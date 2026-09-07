@@ -77,6 +77,12 @@ return {
 					--  To jump back, press <C-t>.
 					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 
+					-- Jump to the definition in a new tab.
+					map("gt", function()
+						vim.cmd("tab split")
+						vim.lsp.buf.definition()
+					end, "[G]oto definition in new [T]ab")
+
 					-- Find references for the word under your cursor.
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
 
