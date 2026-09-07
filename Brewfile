@@ -1,6 +1,5 @@
 cask_args appdir: '/Applications'
 
-tap 'homebrew/bundle'
 tap 'microsoft/git'
 
 brew 'ack'
@@ -25,6 +24,13 @@ brew 'tmux'
 brew 'tpack'
 
 cask 'slack'
+cask 'notion'
+cask 'codex'
+cask 'claude'
+cask 'whatsapp'
+cask 'telegram'
+cask 'github'
+cask 'affinity'
 cask 'iterm2'
 cask 'ghostty'
 cask 'hammerspoon'
