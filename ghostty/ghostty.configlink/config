@@ -1,0 +1,9 @@
+# Ghostty config. Symlinked to ~/.config/ghostty by script/bootstrap.
+# cmux renders with libghostty and reads this file too.
+# Colors come from the theme CLI: `theme apply <name>` regenerates the
+# included ~/.config/theme/ghostty.conf.
+font-family = Hack Nerd Font Mono
+font-size = 15
+unfocused-split-opacity = 0.95
+
+config-file = ?../theme/ghostty.conf

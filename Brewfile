@@ -25,3 +25,6 @@ brew 'tmux'
 brew 'tpack'
 
 cask 'slack'
+cask 'iterm2'
+cask 'ghostty'
+cask 'font-hack-nerd-font'

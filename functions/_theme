@@ -1,0 +1,17 @@
+#compdef theme
+
+local -a commands
+commands=(
+  'list:show available themes'
+  'current:print the current theme name'
+  'apply:switch every tool to a theme'
+  'setup:first-time setup (apply + iTerm default profile)'
+)
+
+if (( CURRENT == 2 )); then
+  _describe 'command' commands
+elif (( CURRENT == 3 )) && [[ $words[2] == apply ]]; then
+  local -a themes
+  themes=(${(f)"$(theme list --names 2> /dev/null)"})
+  _describe 'theme' themes
+fi

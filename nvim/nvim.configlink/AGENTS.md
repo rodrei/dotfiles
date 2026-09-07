@@ -12,7 +12,7 @@ This is a personal Neovim configuration derived from [kickstart.nvim](https://gi
 2. `lua/keymaps.lua` — global, plugin-independent keymaps (tab navigation on `<C-l>`/`<C-h>`/`<C-t>`, terminal escape, diagnostics).
 3. `lua/filetypes.lua` — `FileType` autocommands for per-language buffer-local options (e.g. 2-space indent for TS/JS).
 
-Then `require("lazy").setup({ { import = "plugins" } }, ...)` loads **every file in `lua/plugins/` as a plugin spec**. The plugin manager is [lazy.nvim](https://github.com/folke/lazy.nvim). `lazy-lock.json` pins plugin versions for reproducible installs.
+Then `require("lazy").setup({ { import = "plugins" } }, ...)` loads **every file in `lua/plugins/` as a plugin spec**. After that, `lua/theme.lua` applies the colorscheme selected with the dotfiles `theme` CLI: it reads `~/.config/theme/palette.conf` (falls back to selenized), sets `background`, and reapplies the markdown highlight overrides on every `ColorScheme` event. The colorscheme plugins themselves are declared in `lua/plugins/colorscheme.lua`, one per theme family, all lazy-loaded. The plugin manager is [lazy.nvim](https://github.com/folke/lazy.nvim). `lazy-lock.json` pins plugin versions for reproducible installs.
 
 ### Plugin specs (`lua/plugins/`)
 

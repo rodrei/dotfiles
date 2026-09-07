@@ -31,3 +31,10 @@ Load order in `zsh/zshrc.symlink`: `~/.localrc` (private env vars, not in repo) 
 
 - `git/gitconfig.symlink` is generated and gitignored; the template is `git/gitconfig.symlink.example`.
 - `zsh/zshrc.symlink` also contains machine-specific additions appended below the framework section (nvm, yarn, fzf); rbenv is initialized in `ruby/rbenv.zsh`.
+
+## Theme (colors for terminal, tmux, neovim)
+
+- `theme/themes/<name>/palette.conf` is the single source of truth for a theme (16 ANSI colors, bg/fg/cursor/selection, neovim colorscheme hints). Add a theme by adding a directory.
+- `bin/theme` (`theme list|current|apply <name>|setup`) renders the palette into `~/.config/theme/` (iTerm dynamic profile, Ghostty include, tmux styles, palette copy for neovim) and notifies running apps. Generated files are machine state, never committed.
+- Consumers: iTerm loads `DynamicProfiles/dotfiles-theme.json` (profile "Theme", set as default by `theme setup`); `ghostty/ghostty.configlink/config` includes `../theme/ghostty.conf` (cmux reads the same file); `tmux/tmux.conf.symlink` sources `~/.config/theme/tmux.conf`; neovim's `lua/theme.lua` reads `~/.config/theme/palette.conf` and needs the matching plugin in `lua/plugins/colorscheme.lua`.
+- `theme/install.sh` runs `theme setup`, so a fresh machine ends up on the default theme after `script/bootstrap`.

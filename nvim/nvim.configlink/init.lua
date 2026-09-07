@@ -37,5 +37,8 @@ require("lazy").setup({
 	},
 })
 
+-- Colorscheme chosen with the `theme` CLI (see lua/theme.lua).
+require("theme").apply()
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

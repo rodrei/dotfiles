@@ -1,7 +1,6 @@
 ##### General behavior #####
 
 set -g @plugin 'tmux-plugins/tmux-sensible' # List of plugins
-set -g @plugin 'catppuccin/tmux#v2.3.0' # See https://github.com/catppuccin/tmux/tags for additional tags
 
 # Change prefix from Ctrl-b to Ctrl-a
 
@@ -84,9 +83,9 @@ set -g automatic-rename on
 # But avoid aggressive terminal escape-sequence renaming
 set -g allow-rename off
 
-# Show index + current automatic/manual window name
-set -g @catppuccin_window_current_text " #{window_name}"
-set -g @catppuccin_window_text " #{window_name}"
+# Colors, status bar and border styles come from the theme CLI:
+# `theme apply <name>` regenerates this file and re-sources it live.
+source-file -q ~/.config/theme/tmux.conf
 
 
 ##### Pane UI ######
@@ -95,10 +94,6 @@ set -g @catppuccin_window_text " #{window_name}"
 
 # Default: no top pane title/border label
 set -g pane-border-status off
-
-# Border colors
-set -g pane-border-style "fg=colour238"
-set -g pane-active-border-style "fg=colour177,bold"
 
 # What to show when pane-border-status is enabled
 set -g pane-border-format "#{?pane_active,#[bold]● ,  }#P: #{pane_current_command}"
