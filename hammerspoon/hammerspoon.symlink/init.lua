@@ -17,7 +17,9 @@ local function gatherWindows()
     end
   end
 
-  hs.alert.show(moved .. " window(s) gathered")
+  if moved > 0 then
+    hs.alert.show(moved .. " window(s) gathered")
+  end
 end
 
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "G", gatherWindows)
