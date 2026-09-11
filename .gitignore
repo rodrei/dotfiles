@@ -8,3 +8,4 @@ atom.symlink/storage
 atom.symlink/themes
 system/secret.zsh
 hammerspoon/hammerspoon.symlink/Spoons/
+git/gitconfig.symlink
