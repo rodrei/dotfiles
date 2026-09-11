@@ -287,7 +287,16 @@ return {
 			--
 			-- You can add other tools here that you want Mason to install
 			-- for you, so that they are available from within Neovim.
-			local ensure_installed = vim.tbl_keys(servers or {})
+			--
+			-- `unmanaged` servers are configured above but installed outside
+			-- Mason. ruby_lsp comes from the rbenv shim, so letting Mason also
+			-- `gem install` it both defeats that (Mason's own config would
+			-- override the `cmd` above) and fails outright whenever
+			-- `rbenv global` is a Ruby older than ruby-lsp's prism dependency.
+			local unmanaged = { ruby_lsp = true }
+			local ensure_installed = vim.tbl_filter(function(name)
+				return not unmanaged[name]
+			end, vim.tbl_keys(servers or {}))
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
 			})
@@ -310,6 +319,12 @@ return {
 					exclude = { "rubocop" },
 				},
 			})
+
+			-- automatic_enable only enables servers Mason installed, so the
+			-- unmanaged ones above would never start. Enable them explicitly.
+			for server_name in pairs(unmanaged) do
+				vim.lsp.enable(server_name)
+			end
 		end,
 	},
 }
