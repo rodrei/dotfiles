@@ -31,6 +31,7 @@ Load order in `zsh/zshrc.symlink`: `~/.localrc` (private env vars, not in repo) 
 
 - `git/gitconfig.symlink` is generated and gitignored; the template is `git/gitconfig.symlink.example`.
 - `zsh/zshrc.symlink` also contains machine-specific additions appended below the framework section (nvm, yarn, fzf); rbenv is initialized in `ruby/rbenv.zsh`.
+- `herdr/` can't use `*.configlink`: `~/.config/herdr` also holds runtime state (sockets, logs, `session.json`), so `herdr/install.sh` symlinks just `config.toml` into it. After editing, run `herdr server reload-config` to pick up changes in a running session.
 
 ## Theme (colors for terminal, tmux, neovim)
 
