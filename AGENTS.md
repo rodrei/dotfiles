@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file guides agents (Claude Code, Codex, OpenCode) and human contributors working in this repository.
 
 ## What this is
 
@@ -31,6 +31,8 @@ Load order in `zsh/zshrc.symlink`: `~/.localrc` (private env vars, not in repo) 
 
 - `git/gitconfig.symlink` is generated and gitignored; the template is `git/gitconfig.symlink.example`.
 - `zsh/zshrc.symlink` also contains machine-specific additions appended below the framework section (nvm, yarn, fzf); rbenv is initialized in `ruby/rbenv.zsh`.
+- `herdr/` can't use `*.configlink`: `~/.config/herdr` also holds runtime state (sockets, logs, `session.json`), so `herdr/install.sh` symlinks just `config.toml` into it. After editing, run `herdr server reload-config` to pick up changes in a running session.
+- `agents/` can't use `*.symlink` or `*.configlink` either: the global agent instructions in `agents/AGENTS.md` have to land in `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md` and `~/.config/opencode/AGENTS.md`, so `agents/install.sh` links all three. Edit the one file; every agent reads it. The Claude target is named `CLAUDE.md` on purpose: Claude Code reads `AGENTS.md` at a project root (only when no `CLAUDE.md` sits beside it), but at `~/.claude/` it reads `CLAUDE.md` alone — a global `~/.claude/AGENTS.md` is silently ignored.
 
 ## Theme (colors for terminal, tmux, neovim)
 
