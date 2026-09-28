@@ -240,7 +240,19 @@ return {
 				--    https://github.com/pmizio/typescript-tools.nvim
 				--
 				-- But for many setups, the LSP (`ts_ls`) will work just fine
-				-- ts_ls = {},
+				ts_ls = {},
+
+				pylsp = {
+					settings = {
+						pylsp = {
+							plugins = {
+								-- Style nits (line length, whitespace) are noise; keep
+								-- pyflakes for real errors like undefined names.
+								pycodestyle = { enabled = false },
+							},
+						},
+					},
+				},
 				--
 
 				ruby_lsp = {
