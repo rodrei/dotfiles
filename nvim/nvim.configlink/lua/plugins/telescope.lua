@@ -86,16 +86,46 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
 		-- See `:help telescope.builtin`
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "[F]ind [H]elp" })
+
+		-- Dependency and build directories that are never worth fuzzy-finding.
+		-- Pruned at the walker level so the picker never ingests their contents.
+		local heavy_dirs = {
+			"node_modules",
+			".turbo",
+			"dist",
+			"build",
+			".next",
+			"coverage",
+			".venv",
+			"venv",
+			"vendor",
+			"target",
+			".swc",
+			"storybook-static",
+			".claude/worktrees", -- nested checkouts; git lists them as bare directory entries
+		}
+
+		-- Tracked files, including hidden ones (.github, .claude, ...).
+		-- Respects .gitignore, so the list stays small.
+		local tracked_files_cmd = { "rg", "--files", "--hidden", "--color", "never", "-g", "!.git/" }
+
+		-- Files git does not track: untracked and ignored (.env, local settings,
+		-- scratch notes). `-x` only applies to untracked paths and prunes the
+		-- walk, so heavy directories are never entered. Empty outside a git repo.
+		local untracked_files_cmd = { "git", "ls-files", "--others" }
+		for _, dir in ipairs(heavy_dirs) do
+			table.insert(untracked_files_cmd, "-x")
+			table.insert(untracked_files_cmd, dir)
+		end
+
+		vim.keymap.set("n", "<leader>f?", builtin.help_tags, { desc = "[F]ind Help [?]" })
 		vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[F]ind [K]eymaps" })
-		vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[F]ind [F]iles" })
+		vim.keymap.set("n", "<leader>ff", function()
+			builtin.find_files({ find_command = tracked_files_cmd })
+		end, { desc = "[F]ind [F]iles" })
 		vim.keymap.set("n", "<leader>fh", function()
-			builtin.find_files({
-				hidden = true,
-				no_ignore = true,
-				no_ignore_parent = true
-			})
-		end, { desc = "[F]ind [H]idden Files" })
+			builtin.find_files({ find_command = untracked_files_cmd })
+		end, { desc = "[F]ind un[H]tracked Files" })
 		vim.keymap.set("n", "<leader>fs", builtin.builtin, { desc = "[F]ind [S]elect Telescope" })
 		vim.keymap.set("n", "<leader>fw", builtin.grep_string, { desc = "[F]ind current [W]ord" })
 		vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[F]ind by [G]rep" })
