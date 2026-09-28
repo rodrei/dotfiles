@@ -17,7 +17,15 @@
   --code-bg: #f3f2ec;
   --code-text: #1f1e1d;
   --quote-bg: #f5f4ee;
-  --measure: 46rem;
+
+  /* Layout ---------------------------------------------------------- */
+  /* --page is how wide the whole column may get; --measure is how wide
+     running prose is allowed to get inside it. Tables, code blocks and
+     images ignore --measure and fill --page. */
+  --page: 1400px;
+  --measure: 52rem;
+  --gutter: 2rem;
+  --rail: 16rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,18 +43,74 @@
   }
 }
 
+/* markdown-preview.nvim has its own Dark Mode switch, which stamps
+   data-theme on the document. Follow it as well as the OS setting; these
+   come after the media query so an explicit choice wins either way. */
+
+[data-theme="dark"] {
+  --bg: #262624;
+  --surface: #30302e;
+  --text: #e5e3dc;
+  --heading: #faf9f5;
+  --muted: #a3a29c;
+  --border: #3f3f3b;
+  --accent: #e08a6d;
+  --code-bg: #1f1e1d;
+  --code-text: #f5f4ee;
+  --quote-bg: #2d2d2a;
+}
+
+[data-theme="light"] {
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --text: #3d3929;
+  --heading: #1f1e1d;
+  --muted: #73726c;
+  --border: #e8e6dd;
+  --accent: #d97757;
+  --code-bg: #f3f2ec;
+  --code-text: #1f1e1d;
+  --quote-bg: #f5f4ee;
+}
+
 html,
-body {
+body,
+#__next,
+main {
   background: var(--bg) !important;
   margin: 0;
   padding: 0;
 }
 
+/* The app ships its own page.css, which this stylesheet does not replace
+   (g:mkdp_markdown_css only swaps out markdown.css). Its `#page-ctn` caps
+   the whole page at 900px, so undo that here or nothing below can get
+   any wider. Same ID specificity, loaded later, so this wins. */
+#page-ctn {
+  max-width: none;
+  margin: 0;
+  color: var(--text);
+}
+
+/* Filename bar at the top of the preview. */
+#page-header {
+  background: var(--bg);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0.625rem var(--gutter);
+  color: var(--muted);
+  font-family: inherit;
+}
+
+#page-header h3 { font-size: 0.8125rem; font-weight: 500; }
+#page-header svg { fill: var(--muted); }
+
 .markdown-body {
   box-sizing: border-box;
-  max-width: var(--measure);
+  max-width: var(--page);
   margin: 0 auto;
-  padding: 4rem 1.5rem 6rem;
+  padding: 4rem var(--gutter) 6rem;
   background: var(--bg);
   color: var(--text);
   font-family: ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue",
@@ -55,6 +119,41 @@ body {
   line-height: 1.7;
   word-wrap: break-word;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Measure ----------------------------------------------------------- */
+
+/* Running prose keeps a readable line length; anything that genuinely
+   benefits from the width (tables, code, diagrams, images) spans the
+   full column. markdown-it renders every block as a direct child of
+   .markdown-body, so a child selector is enough to tell them apart. */
+
+.markdown-body > p,
+.markdown-body > ul,
+.markdown-body > ol,
+.markdown-body > dl,
+.markdown-body > blockquote,
+.markdown-body > h1,
+.markdown-body > h2,
+.markdown-body > h3,
+.markdown-body > h4,
+.markdown-body > h5,
+.markdown-body > h6,
+.markdown-body > hr {
+  max-width: var(--measure);
+}
+
+.markdown-body > table,
+.markdown-body > pre,
+.markdown-body > img,
+.markdown-body > .mermaid,
+.markdown-body > .table-of-contents {
+  max-width: none;
+}
+
+/* A paragraph holding nothing but an image is a figure, not prose. */
+.markdown-body > p:has(> img:only-child) {
+  max-width: none;
 }
 
 /* Headings ---------------------------------------------------------- */
@@ -218,4 +317,144 @@ body {
   border-bottom-width: 2px;
   border-radius: 5px;
   color: var(--heading);
+}
+
+/* Table of contents -------------------------------------------------- */
+
+/* markdown-preview.nvim bundles markdown-it-toc-done-right, so putting
+   [[toc]] on its own line anywhere in a document renders a nested
+   <nav class="table-of-contents">. There is no marker-free mode.
+   Below --rail + measure it sits inline as a card; above that it is
+   lifted out of the flow into a fixed rail on the left. */
+
+.table-of-contents {
+  /* border-box so the fixed rail's footprint is exactly --rail; otherwise
+     its padding pushes it wider than the offset reserved for it and it
+     clips the first character of every line. */
+  box-sizing: border-box;
+  margin: 0 0 2.5rem;
+  padding: 1rem 1.25rem 1.125rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.table-of-contents::before {
+  content: "Contents";
+  display: block;
+  margin-bottom: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.table-of-contents ul,
+.table-of-contents ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.table-of-contents ul ul,
+.table-of-contents ol ol {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--border);
+  margin-left: 0.375rem;
+}
+
+.table-of-contents li { margin: 0; }
+.table-of-contents li::marker { content: none; }
+
+.table-of-contents a {
+  display: block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  border-bottom: 0;
+  color: var(--muted);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-of-contents a:hover,
+.table-of-contents a:focus-visible {
+  background: var(--quote-bg);
+  color: var(--heading);
+  border-bottom: 0;
+}
+
+@media (min-width: 1180px) {
+  .table-of-contents {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--rail);
+    margin: 0;
+    padding: 4rem 1rem 3rem 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg);
+    border: 0;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    font-size: 0.875rem;
+  }
+
+  /* The rail is fixed, so the whole app wrapper steps aside for it --
+     #page-ctn rather than .markdown-body, so the filename bar clears it
+     too. The column then centres in what is left. */
+  /* Only reserve the offset when the document actually rendered a rail;
+     a file with no [[toc]] should not be pushed right by an empty gap. */
+  #page-ctn:has(.table-of-contents) {
+    padding-left: calc(var(--rail) + var(--gutter));
+  }
+}
+
+/* Heading anchors ---------------------------------------------------- */
+
+/* markdown-it-anchor gives every heading an id and a permalink; keep the
+   icon out of the way until the heading is hovered. */
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  scroll-margin-top: 2rem;
+}
+
+.markdown-body .anchor {
+  float: left;
+  margin-left: -1.25rem;
+  padding-right: 0.375rem;
+  border-bottom: 0;
+  line-height: inherit;
+  opacity: 0;
+}
+
+.markdown-body .anchor svg {
+  fill: var(--muted);
+  vertical-align: middle;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor,
+.markdown-body h5:hover .anchor,
+.markdown-body h6:hover .anchor,
+.markdown-body .anchor:focus-visible {
+  opacity: 1;
+}
+
+/* The heading you jumped to, so a click from the index lands visibly. */
+.markdown-body :target {
+  box-shadow: -0.75rem 0 0 -0.5rem var(--accent);
 }
