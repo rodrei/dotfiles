@@ -1,22 +1,22 @@
 #!/bin/sh
 #
-# Global agent instructions
+# Global agent instructions and skills
 #
 # ~/.claude, ~/.codex and ~/.config/opencode each hold runtime state next to their
 # config, and none of them are reachable by the *.symlink or *.configlink globs, so
-# AGENTS.md is linked into each one from here.
+# AGENTS.md is linked into each one from here. Skills are linked one at a time into
+# ~/.claude/skills, which also holds skills installed by `npx skills` and other repos.
 
 set -e
 
-src="$(cd "$(dirname "$0")" && pwd)/AGENTS.md"
+dir="$(cd "$(dirname "$0")" && pwd)"
 
-for dst in "$HOME/.claude/CLAUDE.md" \
-           "$HOME/.codex/AGENTS.md" \
-           "$HOME/.config/opencode/AGENTS.md"
-do
+link_file () {
+  src=$1 dst=$2
+
   if [ "$(readlink "$dst")" = "$src" ]
   then
-    continue
+    return
   fi
 
   mkdir -p "$(dirname "$dst")"
@@ -29,4 +29,16 @@ do
 
   ln -s "$src" "$dst"
   echo "  linked $src to $dst"
+}
+
+for dst in "$HOME/.claude/CLAUDE.md" \
+           "$HOME/.codex/AGENTS.md" \
+           "$HOME/.config/opencode/AGENTS.md"
+do
+  link_file "$dir/AGENTS.md" "$dst"
+done
+
+for skill in "$dir"/skills/*
+do
+  link_file "$skill" "$HOME/.claude/skills/$(basename "$skill")"
 done

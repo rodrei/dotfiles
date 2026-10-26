@@ -33,6 +33,7 @@ Load order in `zsh/zshrc.symlink`: `~/.localrc` (private env vars, not in repo) 
 - `zsh/zshrc.symlink` also contains machine-specific additions appended below the framework section (nvm, yarn, fzf); rbenv is initialized in `ruby/rbenv.zsh`.
 - `herdr/` can't use `*.configlink`: `~/.config/herdr` also holds runtime state (sockets, logs, `session.json`), so `herdr/install.sh` symlinks just `config.toml` into it. After editing, run `herdr server reload-config` to pick up changes in a running session.
 - `agents/` can't use `*.symlink` or `*.configlink` either: the global agent instructions in `agents/AGENTS.md` have to land in `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md` and `~/.config/opencode/AGENTS.md`, so `agents/install.sh` links all three. Edit the one file; every agent reads it. The Claude target is named `CLAUDE.md` on purpose: Claude Code reads `AGENTS.md` at a project root (only when no `CLAUDE.md` sits beside it), but at `~/.claude/` it reads `CLAUDE.md` alone — a global `~/.claude/AGENTS.md` is silently ignored.
+- Global skills live in `agents/skills/<name>/SKILL.md`. `agents/install.sh` links each skill directory into `~/.claude/skills/<name>` one by one, never the whole directory: `~/.claude/skills` also holds skills from `npx skills` (via `~/.agents/skills`) and from `~/code/skills-internal`. Add a skill by adding a directory, then rerun `agents/install.sh`.
 
 ## Theme (colors for terminal, tmux, neovim)
 
