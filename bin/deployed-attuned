@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+# Show which commit of the attuned repo is deployed to staging and production,
+# and whether a deploy is in progress.
+#
+# Usage:
+#   deployed-attuned            # summary for both environments
+#   deployed-attuned --diff     # also list the commits between environments
+#   deployed-attuned --no-fetch # skip `git fetch origin main`
+#   deployed-attuned --no-runs  # skip the GitHub Actions run check
+#
+# Deployed versions come from the public GET /api/v1/version/current endpoint
+# of each environment, so no cluster access is needed. Deploy progress comes
+# from GitHub Actions through `gh`, and is skipped when `gh` is missing or not
+# authenticated. Requires curl, jq, and git. Set NO_COLOR=1 to disable colour.
+# Set ATTUNED_REPO to point at the checkout (default: ~/code/attuned).
+set -euo pipefail
+
+ATTUNED_REPO="${ATTUNED_REPO:-$HOME/code/attuned}"
+STAGING_HOST="${STAGING_HOST:-https://staging-span.app}"
+PRODUCTION_HOST="${PRODUCTION_HOST:-https://span.app}"
+
+show_diff=false
+do_fetch=true
+do_runs=true
+for arg in "$@"; do
+  case "$arg" in
+    --diff) show_diff=true ;;
+    --no-fetch) do_fetch=false ;;
+    --no-runs) do_runs=false ;;
+    -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
+
+for tool in curl jq git; do
+  command -v "$tool" >/dev/null || { echo "Missing required tool: $tool" >&2; exit 1; }
+done
+
+if ! git -C "$ATTUNED_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "ATTUNED_REPO is not a git checkout: $ATTUNED_REPO" >&2
+  exit 1
+fi
+cd "$ATTUNED_REPO"
+
+if [ -n "${NO_COLOR:-}" ]; then
+  use_color=false
+elif [ -n "${FORCE_COLOR:-}" ] || [ -t 1 ]; then
+  use_color=true
+else
+  use_color=false
+fi
+
+if $use_color; then
+  reset=$'\e[0m' bold=$'\e[1m' dim=$'\e[2m'
+  cyan=$'\e[36m' yellow=$'\e[33m' green=$'\e[32m' red=$'\e[31m' magenta=$'\e[35m'
+else
+  reset="" bold="" dim="" cyan="" yellow="" green="" red="" magenta=""
+fi
+
+header() {
+  echo "${bold}${cyan}== $1 ==${reset}"
+}
+
+field() {
+  printf '  %s%-8s%s %s\n' "$dim" "$1" "$reset" "$2"
+}
+
+if $do_fetch; then
+  git fetch --quiet origin main || echo "${yellow}Warning: git fetch failed, using local origin/main${reset}" >&2
+fi
+
+if $do_runs && ! command -v gh >/dev/null; then
+  do_runs=false
+  echo "${dim}gh not found, skipping deploy run check${reset}" >&2
+fi
+
+fetch_sha() {
+  local host="$1" sha
+  sha=$(curl -sf --max-time 15 -H "Origin: ${host}" "${host}/api/v1/version/current" | jq -r '.version.sha') || return 1
+  [ -n "$sha" ] && [ "$sha" != "null" ] && [ "$sha" != "unknown" ] || return 1
+  printf '%s' "$sha"
+}
+
+known_commit() {
+  git cat-file -e "$1^{commit}" 2>/dev/null
+}
+
+short() {
+  printf '%s' "${1:0:10}"
+}
+
+# Latest GitHub Actions runs, fetched once and filtered per environment below.
+deploy_runs=""
+build_runs=""
+if $do_runs; then
+  if ! deploy_runs=$(gh run list --workflow deploy.yaml --limit 30 \
+      --json status,conclusion,displayTitle,createdAt,url 2>/dev/null); then
+    do_runs=false
+    echo "${dim}gh could not list workflow runs (not authenticated?), skipping deploy run check${reset}" >&2
+  else
+    build_runs=$(gh run list --workflow build-main.yaml --limit 1 \
+      --json status,conclusion,headSha,createdAt,url 2>/dev/null || echo "[]")
+  fi
+fi
+
+format_time() {
+  jq -rn --arg t "$1" '$t | fromdateiso8601 | localtime | strftime("%Y-%m-%d %H:%M")'
+}
+
+# Prints the state of the latest "Deploy to <env> (<sha>)" run.
+print_deploy_run() {
+  local env="$1" run status conclusion title created url sha
+  run=$(jq -c --arg prefix "Deploy to ${env} (" \
+    '[.[] | select(.displayTitle | startswith($prefix))] | first // empty' <<<"$deploy_runs")
+  if [ -z "$run" ]; then
+    field "deploy:" "${dim}no recent run found${reset}"
+    return
+  fi
+  status=$(jq -r .status <<<"$run")
+  conclusion=$(jq -r .conclusion <<<"$run")
+  title=$(jq -r .displayTitle <<<"$run")
+  created=$(format_time "$(jq -r .createdAt <<<"$run")")
+  url=$(jq -r .url <<<"$run")
+  sha=$(sed -E 's/.*\(([0-9a-f]+)\).*/\1/' <<<"$title")
+
+  case "$status" in
+    completed)
+      case "$conclusion" in
+        success) field "deploy:" "${green}$(short "$sha") succeeded${reset} at ${created}" ;;
+        cancelled) field "deploy:" "${yellow}$(short "$sha") cancelled${reset} at ${created}  ${dim}${url}${reset}" ;;
+        failure) field "deploy:" "${red}$(short "$sha") failed${reset} at ${created}  ${dim}${url}${reset}" ;;
+        *) field "deploy:" "${red}$(short "$sha") ${conclusion}${reset} at ${created}  ${dim}${url}${reset}" ;;
+      esac
+      ;;
+    *)
+      field "deploy:" "${bold}${magenta}$(short "$sha") IN PROGRESS${reset} (${status}) since ${created}  ${dim}${url}${reset}"
+      ;;
+  esac
+}
+
+# Staging only: a merge to main first builds images, then dispatches the deploy.
+print_build_run() {
+  local run status conclusion sha created url
+  run=$(jq -c 'first // empty' <<<"$build_runs")
+  [ -n "$run" ] || return 0
+  status=$(jq -r .status <<<"$run")
+  conclusion=$(jq -r .conclusion <<<"$run")
+  sha=$(jq -r .headSha <<<"$run")
+  created=$(format_time "$(jq -r .createdAt <<<"$run")")
+  url=$(jq -r .url <<<"$run")
+  if [ "$status" != "completed" ]; then
+    field "build:" "${bold}${magenta}$(short "$sha") IN PROGRESS${reset} (${status}) since ${created}, staging deploy follows  ${dim}${url}${reset}"
+  elif [ "$conclusion" = "failure" ]; then
+    field "build:" "${red}$(short "$sha") failed${reset} at ${created}, main is not deploying  ${dim}${url}${reset}"
+  fi
+}
+
+print_env() {
+  local env="$1" sha="$2"
+  header "$env"
+  if [ -z "$sha" ]; then
+    field "version:" "${red}unavailable${reset}"
+  else
+    field "sha:" "${yellow}${sha}${reset}"
+    if known_commit "$sha"; then
+      field "commit:" "$(git log -1 --format='%s' "$sha")"
+      field "author:" "$(git log -1 --format='%an, %ad' --date=format-local:'%Y-%m-%d %H:%M' "$sha")"
+    else
+      field "commit:" "${yellow}not in local history${reset}"
+    fi
+  fi
+  if $do_runs; then
+    print_deploy_run "$env"
+    [ "$env" = "staging" ] && print_build_run
+  fi
+  echo
+}
+
+compare() {
+  local a_label="$1" a_ref="$2" b_label="$3" b_ref="$4"
+  header "$a_label vs $b_label"
+  if [ -z "$a_ref" ] || [ -z "$b_ref" ]; then
+    echo "  ${dim}skipped, a version is unavailable${reset}"
+    echo
+    return
+  fi
+  if ! known_commit "$a_ref"; then
+    echo "  ${yellow}$a_label is not in local history${reset}"
+    echo
+    return
+  fi
+  if ! known_commit "$b_ref"; then
+    echo "  ${yellow}$b_label is not in local history${reset}"
+    echo
+    return
+  fi
+
+  local a_ahead b_ahead
+  a_ahead=$(git rev-list --count "${b_ref}..${a_ref}")
+  b_ahead=$(git rev-list --count "${a_ref}..${b_ref}")
+
+  if [ "$a_ahead" -eq 0 ] && [ "$b_ahead" -eq 0 ]; then
+    echo "  ${green}same commit${reset}"
+  elif [ "$b_ahead" -eq 0 ]; then
+    echo "  ${yellow}$a_label is $a_ahead commit(s) ahead of $b_label${reset}"
+    list_commits "${b_ref}..${a_ref}"
+  elif [ "$a_ahead" -eq 0 ]; then
+    echo "  ${red}$b_label is $b_ahead commit(s) ahead of $a_label${reset}"
+    list_commits "${a_ref}..${b_ref}"
+  else
+    echo "  ${red}diverged: $a_label has $a_ahead commit(s) $b_label lacks, $b_label has $b_ahead commit(s) $a_label lacks${reset}"
+    list_commits "${b_ref}..${a_ref}" "only on $a_label"
+    list_commits "${a_ref}..${b_ref}" "only on $b_label"
+  fi
+  if ! $show_diff && { [ "$a_ahead" -gt 0 ] || [ "$b_ahead" -gt 0 ]; }; then
+    echo "  ${dim}run with --diff to list the commits${reset}"
+  fi
+  echo
+}
+
+list_commits() {
+  local range="$1" title="${2:-}"
+  $show_diff || return 0
+  [ -n "$title" ] && echo "  ${dim}${title}:${reset}"
+  git log --no-decorate --format="  ${yellow}%h${reset} %s" "$range"
+}
+
+staging_sha=$(fetch_sha "$STAGING_HOST") || { staging_sha=""; echo "${red}Could not read ${STAGING_HOST}/api/v1/version/current${reset}" >&2; }
+production_sha=$(fetch_sha "$PRODUCTION_HOST") || { production_sha=""; echo "${red}Could not read ${PRODUCTION_HOST}/api/v1/version/current${reset}" >&2; }
+
+print_env "staging" "$staging_sha"
+print_env "production" "$production_sha"
+
+compare "origin/main" "origin/main" "staging" "$staging_sha"
+compare "staging" "$staging_sha" "production" "$production_sha"
+
+[ -n "$staging_sha" ] && [ -n "$production_sha" ]
