@@ -12,6 +12,9 @@ AGENTS.md / CLAUDE.md wins wherever the two disagree.
   polished version of a bad decision.
 - Report what happened, not what was meant to happen. Failing tests, skipped steps and
   half-finished work get stated plainly.
+- Give every Jira ticket and PR its title next to its ID: "SPAN-12207 (Simplify Spanbyte
+  job entry points)", "attuned #10125 (Serve GitHub execution manifests)". I can't place
+  a bare ID without looking it up.
 
 ## Code
 
@@ -42,11 +45,15 @@ and ask before adding one.
 
 ## PRs & Reviews
 
-- Keep PR descriptions concise. State what changed and why. Do not add narrative framing such as 'separately deployable'.
+- Keep PR descriptions concise: what changed and why, nothing else. No Testing section, and no narrative framing such as 'separately deployable'.
 - Do not reference removed systems or prior implementations in code comments.
 - Write PR reviews to the PR author, with findings only. Leave out architecture explanations unless asked.
 - Scope reviews to the current PR only. Do not compare with earlier PRs unless asked.
 - Include all of the user's uncommitted changes (e.g., .gitignore) when they belong to the PR.
+- Sign every comment or post made on my behalf as Claude: PR reviews, PR and issue
+  comments, Slack and Notion posts. End with a separator and a line such as
+  `🤖 Written by [Claude Code](https://claude.com/claude-code) (Claude <model>)`.
+  Commit messages and PR descriptions keep their own attribution lines.
 
 ## Scope discipline
 
