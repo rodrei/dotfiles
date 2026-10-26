@@ -18,17 +18,18 @@ ask which one.
 ## Queue a task
 
 ```
-taskboard add --title T --kind K --dir D --prompt P [--pr URL]
+taskboard add --title T --kind K --dir DIR --description D [--pr URL]
 ```
 
 The card lands in To do. Later the user clicks ▶ Start on it, which opens a
-Herdr workspace named after the title in D, starts Claude there and sends P as
-its first message. So:
+Herdr workspace named after the title in DIR, starts Claude there and sends
+the title and description as its first message. So:
 
-- `--prompt` is that whole first message: the ask plus every link, ticket and
+- `--description` says what the task is and carries every link, ticket and
   detail from this conversation the new session needs, since it starts with no
-  other context. For a PR review, `/review-pr <url>` runs the user's review
-  skill.
+  other context. For a PR review, make it `/review-pr <url>`: a description
+  that starts with a slash command is sent alone, so the user's review skill
+  runs.
 - `--dir` is the absolute path of the repo the task works in.
 - `--title` is `<ticket or PR id> (<its title>)`, such as
   `attuned #10125 (Serve GitHub execution manifests)`; `gh pr view <url>` gives
@@ -41,7 +42,7 @@ its first message. So:
 ## Change or move a card
 
 ```
-taskboard set ID [--title T] [--kind K] [--pr URL] [--status todo|in_progress|waiting_review|done]
+taskboard set ID [--title T] [--kind K] [--description D] [--pr URL] [--status todo|in_progress|waiting_review|done]
 ```
 
 Without an ID, `set` changes the card for the Herdr workspace you run in. Cards
