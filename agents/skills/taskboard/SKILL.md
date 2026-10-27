@@ -47,8 +47,10 @@ or pushed, and back to In progress when a reviewer requests changes.
 ## Card fields
 
 - `--title`: `<ticket or PR id> (<its title>)`, such as
-  `attuned #10125 (Serve GitHub execution manifests)`; `gh pr view <url>` gives
-  the title when you only have the link.
+  `attuned #10125 (Serve GitHub execution manifests)`, starting with `Review: `
+  for a review of someone else's PR:
+  `Review: attuned #10125 (Serve GitHub execution manifests)`.
+  `gh pr view <url>` gives the title when you only have the link.
 - `--description`: what the task is and why, in a sentence or two; for a
   queued task, more (see below).
 
