@@ -7,3 +7,6 @@ if test -f $completion
 then
   source $completion
 fi
+
+# Adds `git worktree cd` (functions/git) on top of zsh's own _git.
+compdef _git_worktree_cd git

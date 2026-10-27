@@ -1,0 +1,19 @@
+# Adds `git worktree cd <branch>`, which jumps into the worktree that has
+# <branch> checked out. It has to be a shell function: a real git subcommand
+# runs in a child process and can't change this shell's directory. Everything
+# else goes straight to git.
+
+if [[ $1 == worktree && $2 == cd ]]; then
+  local dir
+  dir=$(command git worktree list --porcelain | awk -v ref="refs/heads/$3" '
+    /^worktree / { path = substr($0, 10) }
+    $0 == "branch " ref { print path; exit }
+  ')
+  if [[ -z $dir ]]; then
+    echo "git worktree cd: no worktree has '$3' checked out" >&2
+    return 1
+  fi
+  cd "$dir"
+else
+  command git "$@"
+fi

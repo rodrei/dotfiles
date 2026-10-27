@@ -1,0 +1,22 @@
+#autoload
+#
+# Completes `git worktree cd <branch>` (see functions/git): offers `cd` next to
+# git's own worktree subcommands, then the branches that have a worktree. The
+# rest is zsh's _git. Registered for git in git/completion.zsh.
+
+local expl ret=1
+
+if [[ $words[2] == worktree ]]; then
+  if (( CURRENT == 3 )); then
+    local -a subcommand=('cd:change into the worktree of a branch')
+    _describe -t commands command subcommand && ret=0
+  elif (( CURRENT == 4 )) && [[ $words[3] == cd ]]; then
+    local -a branches
+    branches=(${${(M)${(f)"$(git worktree list --porcelain)"}:#branch *}#branch refs/heads/})
+    _wanted branches expl branch compadd -a branches
+    return
+  fi
+fi
+
+_git "$@" && ret=0
+return ret
