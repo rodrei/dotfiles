@@ -41,3 +41,7 @@ Load order in `zsh/zshrc.symlink`: `~/.localrc` (private env vars, not in repo) 
 - `bin/theme` (`theme list|current|apply <name>|setup`) renders the palette into `~/.config/theme/` (iTerm dynamic profile, Ghostty include, tmux styles, palette copy for neovim) and notifies running apps. Generated files are machine state, never committed.
 - Consumers: iTerm loads `DynamicProfiles/dotfiles-theme.json` (profile "Theme", set as default by `theme setup`); `ghostty/ghostty.configlink/config` includes `../theme/ghostty.conf` (cmux reads the same file); `tmux/tmux.conf.symlink` sources `~/.config/theme/tmux.conf`; neovim's `lua/theme.lua` reads `~/.config/theme/palette.conf` and needs the matching plugin in `lua/plugins/colorscheme.lua`.
 - `theme/install.sh` runs `theme setup`, so a fresh machine ends up on the default theme after `script/bootstrap`.
+
+## Commits
+
+Commit each change you're asked for once it's done, without waiting to be asked; leave it uncommitted only when the user says so. Commit just the files the change touched: the tree often holds the user's own work in progress. Pushing still waits for the user.
