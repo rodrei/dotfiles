@@ -23,32 +23,40 @@ card:
 1. Run `taskboard list` and look for a card that already covers it: the same
    PR, ticket or subject, or a `(Taskboard card #N)` line in the prompt. If
    there is one, run `taskboard start N`.
-2. Otherwise create one: `taskboard start --title T --kind K --description D [--pr URL]`.
+2. Otherwise create one: `taskboard start --title T --description D [--pr URL]`.
 
 `start` moves the card to In progress and makes it this session's card; the
 previous card stays where it was. When unsure whether the task changed, keep
 the current card.
 
-Then keep the card current with `taskboard set --title|--kind|--description|--pr`
-(without an ID it changes this session's card), and attach the PR as soon as
-there is one.
+Then keep the card current with `taskboard set --title|--description` (without
+an ID it changes this session's card), and attach its PRs.
+
+## PRs
+
+Attach every PR the task is about with `taskboard set --pr URL`: the PR you
+review, including one linked in the card's description, and each PR you open,
+as soon as it exists. `--pr` adds to the card's PRs and can repeat, so a task
+spanning several PRs follows them all. `taskboard set --drop-pr URL` detaches
+one attached by mistake.
+
+The board follows attached PRs on GitHub and moves the card itself. Whose PR it
+is decides how: the user's own PRs move the card to Waiting review when opened
+or pushed, and back to In progress when a reviewer requests changes.
 
 ## Card fields
 
 - `--title`: `<ticket or PR id> (<its title>)`, such as
   `attuned #10125 (Serve GitHub execution manifests)`; `gh pr view <url>` gives
   the title when you only have the link.
-- `--kind`: `review` (someone else's PR), `build` (changes that end in a PR of
-  the user's) or `other`.
 - `--description`: what the task is and why, in a sentence or two; for a
   queued task, more (see below).
-- `--pr`: the PR, which the board then follows.
 
 ## Done
 
-The board moves a card to Done by itself once its PR settles it: a review card
-when the user approves the PR or it merges, a build or other card when its PR
-merges. Comments, change requests and closed PRs leave a card where it is.
+The board moves a card to Done by itself once every PR it follows is settled:
+merged, or, for someone else's PR, approved by the user. Comments, change
+requests and closed PRs leave a card where it is.
 
 Never move a card to Done on your own judgement. When a task looks finished but
 no PR settles it, ask the user whether to move the card to Done, and run
@@ -58,7 +66,7 @@ finished counts as a yes.
 ## Queue a task for later
 
 ```
-taskboard add --title T --kind K --dir DIR --description D [--pr URL]
+taskboard add --title T --dir DIR --description D [--pr URL]
 ```
 
 The card lands in To do. The user picks it up later with ▶ Start, which opens a
@@ -70,13 +78,13 @@ and card number, or by copying that same prompt into a session. So:
   review, make it `/review-pr <url>`: a description that starts with a slash
   command is sent alone, so the user's review skill runs.
 - `--dir` is the absolute path of the repo the task works in.
-- `--pr` attaches the PR now, so the board follows it before the task starts.
+- `--pr` attaches a PR now, so the board follows it before the task starts.
 
 ## Change, move or delete any card
 
 ```
 taskboard list
-taskboard set ID [--title T] [--kind K] [--description D] [--pr URL] [--status todo|in_progress|waiting_review|done]
+taskboard set ID [--title T] [--description D] [--pr URL] [--drop-pr URL] [--status todo|in_progress|waiting_review|done]
 taskboard rm ID
 ```
 
