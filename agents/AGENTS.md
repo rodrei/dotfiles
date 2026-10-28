@@ -43,6 +43,12 @@ places — `~/.localrc`, `.git/config`, `~/.config/<tool>/` — rather than a re
 across machines. When a per-machine fix looks like it wants a new tracked file, say so
 and ask before adding one.
 
+## Worktrees
+
+Create every git worktree inside `~/code/worktrees/`. Don't put one next to the repo or
+inside it. The exception is throwaway review checkouts: put those in a temp directory,
+and remove the worktree and its local branch when the review is done.
+
 ## PRs & Reviews
 
 - Keep PR descriptions concise: what changed and why, nothing else. No Testing section, and no narrative framing such as 'separately deployable'.
