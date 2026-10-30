@@ -53,7 +53,7 @@ and remove the worktree and its local branch when the review is done.
 
 - Keep PR descriptions concise: what changed and why, nothing else. No Testing section, and no narrative framing such as 'separately deployable'.
 - Do not reference removed systems or prior implementations in code comments.
-- Write PR reviews to the PR author, with findings only. Leave out architecture explanations unless asked.
+- Write PR reviews to the PR author, with findings only: problems in the PR's own changes. Leave out merge conflicts with the base branch (GitHub already shows them) and architecture explanations unless asked.
 - Scope reviews to the current PR only. Do not compare with earlier PRs unless asked.
 - Include all of the user's uncommitted changes (e.g., .gitignore) when they belong to the PR.
 - Sign every comment or post made on my behalf as Claude: PR reviews, PR and issue
