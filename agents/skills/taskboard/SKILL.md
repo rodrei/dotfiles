@@ -31,7 +31,8 @@ previous card stays where it was. When unsure whether the task changed, keep
 the current card.
 
 Then keep the card current with `taskboard set --title|--description|--jira`
-(without an ID it changes this session's card), and attach its PRs.
+(without an ID it changes this session's card), and attach its PRs and
+artifacts.
 
 ## PRs
 
@@ -44,6 +45,15 @@ one attached by mistake.
 The board follows attached PRs on GitHub and moves the card itself. Whose PR it
 is decides how: the user's own PRs move the card to Waiting review when opened
 or pushed, and back to In progress when a reviewer requests changes.
+
+## Artifacts
+
+Attach every artifact you publish for the task (a plan, a report, a review
+write-up) with `taskboard set --artifact 'TITLE=URL'`, as soon as it exists.
+The card links it under its title as `Artifact: TITLE`, so give the artifact's
+own title. `--artifact` adds to the card's artifacts and can repeat; passing a
+URL the card already has gives it the new title. `taskboard set
+--drop-artifact URL` detaches one.
 
 ## Card fields
 
@@ -77,7 +87,7 @@ through, so the user still sees what they let go.
 ## Queue a task for later
 
 ```
-taskboard add --title T --dir DIR --description D [--jira URL] [--pr URL]
+taskboard add --title T --dir DIR --description D [--jira URL] [--pr URL] [--artifact TITLE=URL]
 ```
 
 The card lands in To do. The user picks it up later with ▶ Start, which opens a
@@ -96,7 +106,7 @@ So:
 
 ```
 taskboard list
-taskboard set ID [--title T] [--description D] [--jira URL] [--pr URL] [--drop-pr URL] [--status todo|in_progress|waiting_review|done|wont_do]
+taskboard set ID [--title T] [--description D] [--jira URL] [--pr URL] [--drop-pr URL] [--artifact TITLE=URL] [--drop-artifact URL] [--status todo|in_progress|waiting_review|done|wont_do]
 taskboard rm ID
 ```
 
