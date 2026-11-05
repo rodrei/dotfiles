@@ -18,7 +18,11 @@ Each topic gets one file in `/tmp/side-pane/<tab>/`, where `<tab>` is `$HERDR_TA
 
 `terminal-browser ls` lists the browser in this tab, if any, with its tabs; the location column ends with the browser's pane ID.
 
-- **No browser in this tab**: `terminal-browser open <file> --split right`. Opening moves the user's keyboard focus into the browser, so hand it back: `herdr pane focus --direction left --pane <browser pane>`.
+- **No browser in this tab**: create the pane yourself and start the browser in it, so the user's focus and visible workspace stay where they are (`terminal-browser open --split` takes focus, and Herdr brings that pane's workspace to the front):
+  ```
+  herdr pane split --current --direction right --no-focus   # new pane: .result.pane.pane_id
+  herdr pane run <pane> "terminal-browser open <file>"
+  ```
 - **Browser open, file not in it**: `terminal-browser new-tab <file>`.
 - **File already open, content changed**: `terminal-browser action --tab <n> -- reload`.
 
