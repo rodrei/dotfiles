@@ -4,11 +4,6 @@ onboarding = false
 name = "tokyo-night"
 auto_switch = false
 
-[terminal]
-# Herdr's default, spelled out: terminal-browser rewrites this file to enable
-# it unless it finds this exact line.
-kitty_graphics = true
-
 [keys]
 # Ctrl+Space as the prefix instead of the default ctrl+b.
 prefix = "ctrl+space"
