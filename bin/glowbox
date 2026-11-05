@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+#
+# Render a Markdown file with glow, drawing each code block as a padded box.
+#
+# glow only colours the characters of code, so glow/glowbox.json marks where
+# each block starts and ends and this script paints the background across the
+# full width. Pages through less in a terminal, like `glow -p`.
+#
+# USAGE:
+#
+#   $ glowbox README.md
+
+import os
+import re
+import subprocess
+import sys
+import unicodedata
+
+THEME = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "glow", "glowbox.json")
+START, END = "<<glowbox>>", "<</glowbox>>"
+BG = "\x1b[48;2;41;46;66m"  # #292e42
+RESET = "\x1b[0m"
+WIDTH = 80
+MARGIN = "  "  # glow's document margin, left outside the box
+
+SGR = re.compile(r"\x1b\[[0-9;]*m")
+TRAILING = re.compile(r"(?:\x1b\[[0-9;]*m| )+$")
+
+
+def visible(s):
+    return SGR.sub("", s)
+
+
+def width(s):
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in visible(s))
+
+
+def code_line(line):
+    body = TRAILING.sub("", line[len(MARGIN):]).replace("\t", "    ")
+    # Every reset inside the line would clear the box colour, so restore it.
+    return BG + SGR.sub(lambda m: m.group(0) + BG if m.group(0) in ("\x1b[m", "\x1b[0m") else m.group(0), body)
+
+
+def box(lines):
+    inner = max([WIDTH - 2 * len(MARGIN)] + [width(l) + 2 for l in lines])
+    pad = MARGIN + BG + " " * inner + RESET
+    return [pad] + [MARGIN + l + BG + " " * (inner - width(l)) + RESET for l in lines] + [pad]
+
+
+def render(path):
+    glow = subprocess.run(["glow", "-s", THEME, "-w", str(WIDTH), path], capture_output=True, text=True)
+    if glow.returncode != 0:
+        sys.stderr.write(glow.stderr)
+        sys.exit(glow.returncode)
+    rows, block = [], None
+    for line in glow.stdout.split("\n"):
+        mark = visible(line).strip()
+        if mark == START:
+            block = []
+        elif mark == END and block is not None:
+            rows += box(block)
+            block = None
+        elif block is not None:
+            block.append(code_line(line))
+        else:
+            rows.append(line)
+    return "\n".join(rows)
+
+
+if len(sys.argv) != 2:
+    sys.exit("usage: glowbox <file.md>")
+text = render(sys.argv[1])
+if sys.stdout.isatty():
+    subprocess.run(["less", "-R"], input=text, text=True)
+else:
+    sys.stdout.write(text)
