@@ -10,13 +10,13 @@ The user is done with this session's task. Close out what belongs to it in the o
 
 ## 1. Card
 
-This session's card is the one the prompt's "Taskboard:" line names. If there's no card, or you're outside Herdr, skip this step.
+This session's card is the one the prompt's "Taskboard:" line names. If there's no card, or you're outside Herdr, skip this step and step 3's card check.
 
-Find the card's status and PRs in `taskboard list`. Each PR's state comes from `gh pr view URL --json state`.
+Find the card's status and PRs in `taskboard list`. A PR is **settled** when it's merged or closed, or when it's someone else's and the user approved it. Check with `gh pr view URL --json state,author,reviews`, comparing against the user's login from `gh api user --jq .login`. Check each PR after everything else this prompt asked for, such as an approval, is done.
 
-- `in_progress` with no open PRs: run `taskboard set ID --status done`.
-- `in_progress` with an open PR: leave the card where it is and report the PR. The board moves the card once the PR settles.
-- Any other status: leave the card. This doesn't count as something left behind.
+- `done` or `wont_do`: nothing to do.
+- Any other status, with every PR settled or no PRs: run `taskboard set ID --status done`.
+- Any PR not settled: leave the card and report which PR. The card blocks the close.
 
 ## 2. Worktrees
 
@@ -39,14 +39,14 @@ Remove worktrees with `git` rather than `herdr worktree remove`. The Herdr comma
 
 Outside Herdr, skip this step.
 
-Close only when steps 1 and 2 left nothing behind. Then run `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`. If it shows a pane other than `$HERDR_PANE_ID` and the one labelled `side-pane`, ask the user before closing, because closing ends whatever runs there.
+Close only when steps 1 and 2 left nothing behind and the card shows `done` or `wont_do` in `taskboard list`. Then run `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`. If it shows a pane other than `$HERDR_PANE_ID` and the one labelled `side-pane`, ask the user before closing, because closing ends whatever runs there.
 
-First write the report as the message text: the card's move, the worktrees removed, the branches deleted. Then, in the same message, run the close as the last tool call. It ends this session, so nothing after it reaches the user. If this workspace's worktree passed step 2, remove it in the same command:
+First write the report as the message text: the card's move, the worktrees removed, the branches deleted. Then, in the same message, run the close as the last tool call. It ends this session, so nothing after it reaches the user. The command starts by checking the card again, so a card that isn't closed stops it before anything is removed. If this workspace's worktree passed step 2, the command removes it too:
 
 ```
-cd MAIN_CHECKOUT && git worktree remove PATH && git branch -D BRANCH && herdr workspace close "$HERDR_WORKSPACE_ID"
+taskboard list | grep -qE '^#ID +(done|wont_do) ' && cd MAIN_CHECKOUT && git worktree remove PATH && git branch -D BRANCH && herdr workspace close "$HERDR_WORKSPACE_ID"
 ```
 
-Leave out `git branch -D BRANCH` when the branch isn't merged. If there's no worktree to remove, the command is just `herdr workspace close "$HERDR_WORKSPACE_ID"`.
+Leave out `git branch -D BRANCH` when the branch isn't merged, and the worktree part when there's no worktree to remove. Leave out the `taskboard list` check only when step 1 found no card. If the check stops the command, report that the card isn't closed.
 
 If the close fails with `workspace_group_close_required`, this is a main checkout whose worktree workspaces are still open. Report that and leave the workspace open. Never add `--group`.
