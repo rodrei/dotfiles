@@ -1,0 +1,22 @@
+#autoload
+#
+# Completes sops with paths. Homebrew's _sops (urfave/cli's generic script)
+# offers files only when sops suggests nothing, and sops always suggests its
+# subcommands or flags, so `sops <tab>` and `sops -d <tab>` never list paths.
+# This asks sops the same way, keeps its flags for words starting with `-` and
+# otherwise lists its subcommands next to files. Registered for sops in
+# sops/completion.zsh.
+
+local cur=$words[CURRENT] ret=1
+local -a suggestions
+
+if [[ $cur == -* ]]; then
+  suggestions=(${(f)"$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 $words[1,CURRENT-1] $cur --generate-bash-completion 2>/dev/null)"})
+  _describe -t options flag suggestions && ret=0
+else
+  suggestions=(${(M)${(f)"$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 $words[1,CURRENT-1] --generate-bash-completion 2>/dev/null)"}:#[^-]*})
+  _describe -t commands command suggestions && ret=0
+  _files && ret=0
+fi
+
+return ret
