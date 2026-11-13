@@ -12,9 +12,10 @@ server is down: tell the user, and restart it with
 
 ## This session's card
 
-In Herdr, every prompt arrives with a "Taskboard:" line naming this session's
-card, or saying it has none. Cards follow tasks, not sessions: the user often
-takes one session through several tasks, and opens new tabs for old ones.
+In Herdr (the TUI or the app), every prompt arrives with a "Taskboard:" line
+naming this session's card, or saying it has none. Cards follow tasks, not
+sessions: the user often takes one session through several tasks, and opens
+new tabs for old ones.
 
 When a prompt starts a task worth tracking (a PR to review, a ticket or change
 to build, an investigation; not a quick question) and it isn't this session's
@@ -25,6 +26,7 @@ card:
    there is one, run `taskboard start N`.
 2. Otherwise create one:
    `taskboard start --title T --description D [--jira URL] [--pr URL]`.
+3. Name the workspace after the task when it's new (see Workspace name).
 
 `start` moves the card to In progress and makes it this session's card; the
 previous card stays where it was. When unsure whether the task changed, keep
@@ -33,6 +35,28 @@ the current card.
 Then keep the card current with `taskboard set --title|--description|--jira`
 (without an ID it changes this session's card), and attach its PRs and
 artifacts.
+
+## Workspace name
+
+A new workspace still has Herdr's default name: the name of the repo or folder
+its first terminal is in, such as `attuned` or `attuned-span-12207`, or `~`.
+When `start` gives this session a card, rename the workspace if it has that
+default name and one tab holding one pane, not counting the side pane. Any
+other name is one the user chose: keep it.
+
+The new name is a few words, under 40 characters, that pick this task out in
+the sidebar: the card title shortened, such as `Serve GitHub execution
+manifests`. For a review, `Review <repo> <PR number>`, such as
+`Review attuned 10125`, or `Review <topic>` for several PRs, the topic a few
+words for what they change together.
+
+- Herdr TUI (`HERDR_ENV=1`): `herdr workspace get "$HERDR_WORKSPACE_ID"` shows
+  its `label`, `tab_count` and `pane_count`. Rename it with
+  `herdr workspace rename "$HERDR_WORKSPACE_ID" "<name>"`.
+- Herdr app (`HC_TERMINAL_ID` set): the space ID is
+  `hc get "$HC_TERMINAL_ID" --json | jq -r '.labels["herdr.space"]'`, and
+  `herdr-app ls` shows that space's `name`, tabs and terminals. Rename it with
+  `herdr-app do space.rename --id <space> --name "<name>"`.
 
 ## PRs
 

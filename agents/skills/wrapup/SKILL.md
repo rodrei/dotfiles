@@ -27,11 +27,16 @@ Check each one:
 - **Clean**: `git -C PATH status --porcelain` prints nothing.
 - **Saved**: the branch is pushed (`git -C PATH rev-list @{u}..HEAD` prints nothing), or it's merged. A branch counts as merged when `git merge-base --is-ancestor BRANCH origin/main` passes after a fetch, or when `gh pr list --head BRANCH --state merged --json headRefOid` shows a PR whose head is the branch tip. The second check covers squash merges.
 
-If a worktree fails either check, leave it and report why. If it passes, `herdr worktree list --cwd PATH` shows whether it's open in a workspace (`open_workspace_id`):
+If a worktree fails either check, leave it and report why. If it passes, find the workspaces it's open in:
+
+- Herdr TUI (`HERDR_ENV=1`): `herdr worktree list --cwd PATH` shows its `open_workspace_id`.
+- Herdr app (`HC_TERMINAL_ID` set): it's open in every space with a terminal inside it. `hc ls --json` lists each terminal's `address` and `cwd`. For each terminal whose `cwd` is PATH or below it, `hc get ADDRESS --json | jq -r '.labels["herdr.space"]'` is its space. A terminal without that label is a background job outside the window: count it as another workspace.
+
+Then:
 
 - **Not open**: run `git -C MAIN_CHECKOUT worktree remove PATH`. If the branch is merged, also delete it with `git -C MAIN_CHECKOUT branch -D BRANCH`.
-- **Open in this workspace** (`$HERDR_WORKSPACE_ID`): its removal is part of step 3's close.
-- **Open in another workspace**: leave it and report it. Removing it would close that workspace.
+- **Open in this workspace only** (`$HERDR_WORKSPACE_ID` in the TUI, the `herdr.space` label of `$HC_TERMINAL_ID` in the app): its removal is part of step 3's close.
+- **Open in another workspace**: leave it and report it. Removing it would pull the folder out from under whatever runs there, and in the TUI it closes that workspace.
 
 Remove worktrees with `git` rather than `herdr worktree remove`. The Herdr command closes the worktree's workspace and keeps the branch, so for this session's own worktree it would end the session before the branch could be deleted.
 
@@ -39,14 +44,19 @@ Remove worktrees with `git` rather than `herdr worktree remove`. The Herdr comma
 
 Outside Herdr, skip this step.
 
-Close only when steps 1 and 2 left nothing behind and the card shows `done` or `wont_do` in `taskboard list`. Then run `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`. If it shows a pane other than `$HERDR_PANE_ID` and the one labelled `side-pane`, ask the user before closing, because closing ends whatever runs there.
+Close only when steps 1 and 2 left nothing behind and the card shows `done` or `wont_do` in `taskboard list`. Then list this workspace's panes. If one runs something other than this session and the side pane, ask the user before closing, because closing ends whatever runs there.
+
+- Herdr TUI: `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`. This session is `$HERDR_PANE_ID`, and the side pane is labelled `side-pane`.
+- Herdr app: this space's terminals in `herdr-app ls`. This session is `$HC_TERMINAL_ID`, and the side pane is the terminal `hc ls --json --label herdr.space=SPACE --label side-pane=1` lists.
 
 First write the report as the message text: the card's move, the worktrees removed, the branches deleted. Then, in the same message, run the close as the last tool call. It ends this session, so nothing after it reaches the user. The command starts by checking the card again, so a card that isn't closed stops it before anything is removed. If this workspace's worktree passed step 2, the command removes it too:
 
 ```
-taskboard list | grep -qE '^#ID +(done|wont_do) ' && cd MAIN_CHECKOUT && git worktree remove PATH && git branch -D BRANCH && herdr workspace close "$HERDR_WORKSPACE_ID"
+taskboard list | grep -qE '^#ID +(done|wont_do) ' && cd MAIN_CHECKOUT && git worktree remove PATH && git branch -D BRANCH && CLOSE
 ```
+
+CLOSE is `herdr workspace close "$HERDR_WORKSPACE_ID"` in the TUI, and `herdr-app do space.close '{"id":"SPACE","confirmed":true}'` in the app, SPACE being this terminal's `herdr.space` label.
 
 Leave out `git branch -D BRANCH` when the branch isn't merged, and the worktree part when there's no worktree to remove. Leave out the `taskboard list` check only when step 1 found no card. If the check stops the command, report that the card isn't closed.
 
-If the close fails with `workspace_group_close_required`, this is a main checkout whose worktree workspaces are still open. Report that and leave the workspace open. Never add `--group`.
+If the TUI close fails with `workspace_group_close_required`, this is a main checkout whose worktree workspaces are still open. Report that and leave the workspace open. Never add `--group`.
