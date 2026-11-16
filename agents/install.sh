@@ -1,11 +1,12 @@
 #!/bin/sh
 #
-# Global agent instructions and skills
+# Global agent instructions, skills and hooks
 #
 # ~/.claude, ~/.codex and ~/.config/opencode each hold runtime state next to their
 # config, and none of them are reachable by the *.symlink or *.configlink globs, so
 # AGENTS.md is linked into each one from here. Skills are linked one at a time into
 # ~/.claude/skills, which also holds skills installed by `npx skills` and other repos.
+# Hooks are linked into ~/.claude/hooks; ~/.claude/settings.json registers them.
 
 set -e
 
@@ -41,4 +42,9 @@ done
 for skill in "$dir"/skills/*
 do
   link_file "$skill" "$HOME/.claude/skills/$(basename "$skill")"
+done
+
+for hook in "$dir"/hooks/*
+do
+  link_file "$hook" "$HOME/.claude/hooks/$(basename "$hook")"
 done

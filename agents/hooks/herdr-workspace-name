@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# Claude Code UserPromptSubmit hook: while this session's Herdr workspace (TUI)
+# or space (app) has no name of its own, tell the agent to name it after the
+# task. Prints nothing outside Herdr or once the workspace is named.
+#
+# Neither Herdr reports whether a name was chosen. An unnamed workspace is
+# called after its first pane's repo, else its folder, or ~ at home, and that
+# name follows the pane as it moves, so a name equal to it is one nobody chose.
+
+cat > /dev/null
+
+# Claude Code runs hooks without the login shell's PATH.
+PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+
+default_name () {
+  if [ "$1" = "$HOME" ]
+  then
+    echo "~"
+  elif top=$(git -C "$1" rev-parse --show-toplevel 2> /dev/null)
+  then
+    basename "$top"
+  else
+    basename "$1"
+  fi
+}
+
+# A TUI started from a Herdr app terminal inherits HC_TERMINAL_ID, so the TUI
+# goes first.
+if [ "$HERDR_ENV" = 1 ] && [ -n "$HERDR_WORKSPACE_ID" ]
+then
+  name=$(herdr workspace get "$HERDR_WORKSPACE_ID" | jq -r '.result.workspace.label // empty')
+  cwd=$(herdr pane list --workspace "$HERDR_WORKSPACE_ID" | jq -r '.result.panes[0].cwd // empty')
+  rename="herdr workspace rename $HERDR_WORKSPACE_ID \"<name>\""
+elif [ -n "$HC_TERMINAL_ID" ]
+then
+  space=$(hc get "$HC_TERMINAL_ID" --json | jq -r '.labels["herdr.space"] // empty')
+  [ -n "$space" ] || exit 0
+  spaces=$(herdr-app ls) || exit 0
+  name=$(printf '%s' "$spaces" | jq -r --arg s "$space" '.spaces[] | select(.id == $s) | .name // empty')
+  first=$(printf '%s' "$spaces" | jq -r --arg s "$space" '.spaces[] | select(.id == $s) | .tabs[0].terminals[0].terminal // empty')
+  [ -n "$first" ] || exit 0
+  cwd=$(hc get "$first" --json | jq -r '.cwd // empty')
+  rename="herdr-app do space.rename --id $space --name \"<name>\""
+else
+  exit 0
+fi
+
+[ -n "$cwd" ] || exit 0
+
+if [ -n "$name" ] && [ "$name" != "$(default_name "$cwd")" ]
+then
+  exit 0
+fi
+
+jq -n --arg name "$name" --arg rename "$rename" '{
+  hookSpecificOutput: {
+    hookEventName: "UserPromptSubmit",
+    additionalContext: "Herdr: this workspace has no name of its own\(if $name == "" then "" else " (it shows \"\($name)\", Herdr'"'"'s default)" end). If this prompt starts a task, not a quick question, name the workspace after the task before any other work: `\($rename)`. The name is a few words under 40 characters that pick the task out in the sidebar, such as the taskboard card title shortened, or for a PR review `Review <repo> <PR number>`, such as `Review attuned 10125`, or `Review <topic>` for several PRs."
+  }
+}'
