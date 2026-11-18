@@ -1,7 +1,6 @@
 ---
 name: wrapup
-description: Finish this session's task. Close its card, remove its worktrees and close its Herdr workspace.
-disable-model-invocation: true
+description: Wrap up this session's task and end the session, closing its card, worktrees and Herdr workspace. Use only when the user asks to wrap up, alone or at the end of a longer prompt.
 ---
 
 # Wrap up
